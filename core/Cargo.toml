@@ -3,5 +3,10 @@ name = "ascii-izer"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["crossterm"]
+crossterm = ["dep:crossterm"]
+
 [dependencies]
+crossterm = { version = "0.28.1", optional = true }
 image = "0.25.5"
