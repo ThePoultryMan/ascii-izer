@@ -1,0 +1,10 @@
+[package]
+name = "ascii-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ascii-izer = { path = "../core", optional = true }
+
+[features]
+test = [ "dep:ascii-izer" ]
