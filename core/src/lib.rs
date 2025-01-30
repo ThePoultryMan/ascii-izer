@@ -4,7 +4,6 @@ use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageReader};
 pub use {error::AsciiError, terminal::put_in_console};
 
 mod error;
-#[cfg(feature = "crossterm")]
 mod terminal;
 
 pub fn to_gray_vector<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, AsciiError> {
@@ -12,7 +11,7 @@ pub fn to_gray_vector<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, AsciiError> {
     let image = ImageReader::open(path)?.decode()?;
 
     for (_, _, color) in image.grayscale().pixels() {
-        buffer.push(*color.0.get(0).expect("color is missing."));
+        buffer.push(*color.0.first().expect("color is missing."));
     }
 
     Ok(buffer)
@@ -22,7 +21,7 @@ pub fn to_gray_vector_from_image(image: &DynamicImage) -> Result<Vec<u8>, AsciiE
     let mut buffer = Vec::new();
 
     for (_, _, color) in image.grayscale().pixels() {
-        buffer.push(*color.0.get(0).expect("color is missing"));
+        buffer.push(*color.0.first().expect("color is missing"));
     }
 
     Ok(buffer)

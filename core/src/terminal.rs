@@ -25,7 +25,7 @@ pub fn put_in_console<P: AsRef<Path>>(image: P) -> Result<(), AsciiError> {
     for (index, chars) in chunks {
         let _ = stdout.write(chars.iter().collect::<String>().as_bytes());
         if index != chunks_max {
-            let _ = stdout.write(&['\n' as u8]);
+            let _ = stdout.write(b"\n");
         }
     }
 
