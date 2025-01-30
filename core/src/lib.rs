@@ -1,7 +1,9 @@
 use std::path::Path;
 
 use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageReader};
-pub use {error::AsciiError, terminal::put_in_console};
+pub use error::AsciiError;
+#[cfg(feature = "crossterm")]
+pub use terminal::put_in_console;
 
 mod error;
 mod terminal;
