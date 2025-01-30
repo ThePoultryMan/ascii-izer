@@ -55,6 +55,44 @@ pub fn to_chars(gray_vector: Vec<u8>) -> Vec<char> {
     chars
 }
 
+pub fn to_strings(gray_vector: Vec<u8>, division: usize) -> Vec<String> {
+    let mut strings = Vec::with_capacity(gray_vector.len() / division);
+    strings.push(String::with_capacity(division));
+    let mut place = 0;
+    let mut index = 0;
+
+    for level in gray_vector {
+        let string: &mut String = strings.get_mut(index).unwrap();
+        if level > 230 {
+            string.push(' ');
+        } else if level >= 200 {
+            string.push('.');
+        } else if level >= 180 {
+            string.push('*');
+        } else if level >= 160 {
+            string.push(':');
+        } else if level >= 130 {
+            string.push('o');
+        } else if level >= 100 {
+            string.push('&');
+        } else if level >= 70 {
+            string.push('8');
+        } else if level >= 50 {
+            string.push('#');
+        } else {
+            string.push('@');
+        }
+
+        place += 1;
+        if place == division - 1 {
+            strings.push(String::with_capacity(division));
+            index += 1;
+        }
+    }
+
+    strings
+}
+
 pub fn to_ascii<P: AsRef<Path>>(
     image_path: P,
     dimensions: (u32, u32),
@@ -64,6 +102,16 @@ pub fn to_ascii<P: AsRef<Path>>(
 
     let gray_vector = to_gray_vector_from_image(&image)?;
     let ascii_result = to_chars(gray_vector);
+
+    Ok(ascii_result)
+}
+
+pub fn to_ascii_string<P: AsRef<Path>>(image_path: P, dimensions: (u32, u32)) -> Result<Vec<String>, AsciiError> {
+    let mut image = ImageReader::open(image_path)?.decode()?;
+    image = image.resize_exact(dimensions.0, dimensions.1, FilterType::Lanczos3);
+
+    let gray_vector = to_gray_vector_from_image(&image)?;
+    let ascii_result = to_strings(gray_vector.clone(), dimensions.0 as usize);
 
     Ok(ascii_result)
 }
