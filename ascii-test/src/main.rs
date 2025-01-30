@@ -3,12 +3,16 @@ fn main() {}
 
 #[cfg(feature = "test")]
 mod test_values;
+#[cfg(feature = "test")]
+use ascii_izer::put_in_console;
 
 #[cfg(feature = "test")]
 #[cfg(test)]
 mod test {
-    use ascii_izer::{to_gray_vector, to_chars, to_ascii};
-    use crate::test_values::{create_correct_ascii, create_correct_ascii_small, create_correct_vec};
+    use crate::test_values::{
+        create_correct_ascii, create_correct_ascii_small, create_correct_vec,
+    };
+    use ascii_izer::{to_ascii, to_chars, to_gray_vector};
 
     #[test]
     fn to_bits_test() {
@@ -39,4 +43,6 @@ mod test {
 }
 
 #[cfg(feature = "test")]
-fn main() {}
+fn main() {
+    let _ = put_in_console("../cuddlyferris.png");
+}
