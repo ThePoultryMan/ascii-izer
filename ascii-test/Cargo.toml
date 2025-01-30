@@ -9,3 +9,4 @@ ascii-izer = { path = "../core", optional = true }
 
 [features]
 test = [ "dep:ascii-izer" ]
+terminal = ["test", "ascii-izer/crossterm"]

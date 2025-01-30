@@ -1,10 +1,11 @@
 use std::path::Path;
 
 use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageReader};
-pub use error::AsciiError;
+pub use {error::AsciiError, generator::ASCIIGenerator};
 #[cfg(feature = "crossterm")]
 pub use terminal::put_in_console;
 
+mod generator;
 mod error;
 mod terminal;
 
@@ -113,7 +114,14 @@ pub fn to_ascii_string<P: AsRef<Path>>(image_path: P, dimensions: (u32, u32)) ->
     image = image.resize_exact(dimensions.0, dimensions.1, FilterType::Lanczos3);
 
     let gray_vector = to_gray_vector_from_image(&image)?;
-    let ascii_result = to_strings(gray_vector.clone(), dimensions.0 as usize);
+    let ascii_result = to_strings(gray_vector, dimensions.0 as usize);
+
+    Ok(ascii_result)
+}
+
+pub fn to_ascii_from_image(image: &DynamicImage, dimensions: (u32, u32)) -> Result<Vec<String>, AsciiError> {
+    let gray_vector = to_gray_vector_from_image(image)?;
+    let ascii_result = to_strings(gray_vector, dimensions.0 as usize);
 
     Ok(ascii_result)
 }

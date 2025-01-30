@@ -6,6 +6,7 @@ use image::ImageError;
 pub enum AsciiError {
     ImageError(ImageError),
     IOError(io::Error),
+    NoImage,
 }
 
 impl Error for AsciiError {}
@@ -18,6 +19,9 @@ impl Display for AsciiError {
             }
             AsciiError::IOError(error) => {
                 write!(f, "{error}")
+            },
+            AsciiError::NoImage => {
+                write!(f, "You must provide an image to generate from")
             }
         }
     }
