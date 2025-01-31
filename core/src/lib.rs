@@ -1,127 +1,107 @@
 use std::path::Path;
 
-use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageReader};
-pub use {error::AsciiError, generator::ASCIIGenerator};
+#[cfg(feature = "color")]
+use color::Color;
+use color::{to_grayscale, GrayscaleMode};
+use image::{DynamicImage, GenericImageView, ImageReader};
 #[cfg(feature = "crossterm")]
 pub use terminal::put_in_console;
+pub use {error::AsciiError, generator::ASCIIGenerator};
 
-mod generator;
+mod color;
 mod error;
+mod generator;
 mod terminal;
 
-pub fn to_gray_vector<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, AsciiError> {
-    let mut buffer = Vec::new();
+#[derive(Debug, Clone)]
+pub struct Line {
+    chars: Vec<char>,
+    #[cfg(feature = "color")]
+    colors: Vec<Color>,
+}
+
+impl Line {
+    pub fn new(size: usize) -> Self {
+        Line {
+            chars: Vec::with_capacity(size),
+            #[cfg(feature = "color")]
+            colors: vec![Color::white(); size],
+        }
+    }
+
+    pub fn add_char(&mut self, char: char) {
+        self.chars.push(char);
+    }
+
+    pub fn add_color(&mut self, color: Color) {
+        self.colors.push(color);
+    }
+
+    pub fn chars(&self) -> &Vec<char> {
+        &self.chars
+    }
+
+    #[cfg(feature = "color")]
+    pub fn colors(&self) -> &Vec<Color> {
+        &self.colors
+    }
+}
+
+pub fn to_ascii_lines<P: AsRef<Path>>(
+    path: P,
+    grayscale_mode: GrayscaleMode,
+    #[cfg(feature = "color")] with_color: bool,
+) -> Result<Vec<Line>, AsciiError> {
     let image = ImageReader::open(path)?.decode()?;
-
-    for (_, _, color) in image.grayscale().pixels() {
-        buffer.push(*color.0.first().expect("color is missing."));
-    }
-
-    Ok(buffer)
+    image_into_lines(
+        &image,
+        grayscale_mode,
+        #[cfg(feature = "color")]
+        with_color,
+    )
 }
 
-pub fn to_gray_vector_from_image(image: &DynamicImage) -> Result<Vec<u8>, AsciiError> {
-    let mut buffer = Vec::new();
+pub fn image_into_lines(
+    image: &DynamicImage,
+    grayscale_mode: GrayscaleMode,
+    #[cfg(feature = "color")] with_color: bool,
+) -> Result<Vec<Line>, AsciiError> {
+    let mut lines: Vec<Line> =
+        vec![Line::new(image.dimensions().0 as usize); image.dimensions().1 as usize];
+    for (_, y, color) in image.pixels() {
+        let color = Color::from(color.0);
+        let gray = color.grayscale(grayscale_mode);
 
-    for (_, _, color) in image.grayscale().pixels() {
-        buffer.push(*color.0.first().expect("color is missing"));
-    }
-
-    Ok(buffer)
-}
-
-pub fn to_chars(gray_vector: Vec<u8>) -> Vec<char> {
-    let mut chars = Vec::with_capacity(gray_vector.len());
-
-    for level in gray_vector {
-        if level > 230 {
-            chars.push(' ');
-        } else if level >= 200 {
-            chars.push('.');
-        } else if level >= 180 {
-            chars.push('*');
-        } else if level >= 160 {
-            chars.push(':');
-        } else if level >= 130 {
-            chars.push('o');
-        } else if level >= 100 {
-            chars.push('&');
-        } else if level >= 70 {
-            chars.push('8');
-        } else if level >= 50 {
-            chars.push('#');
-        } else {
-            chars.push('@');
+        lines
+            .get_mut(y as usize)
+            .unwrap()
+            .add_char(char_from_gray(gray));
+        if cfg!(feature = "color") && with_color {
+            lines.get_mut(y as usize).unwrap().add_color(color);
         }
     }
 
-    chars
+    Ok(lines)
 }
 
-pub fn to_strings(gray_vector: Vec<u8>, division: usize) -> Vec<String> {
-    let mut strings = Vec::with_capacity(gray_vector.len() / division);
-    strings.push(String::with_capacity(division));
-    let mut place = 0;
-    let mut index = 0;
-
-    for level in gray_vector {
-        let string: &mut String = strings.get_mut(index).unwrap();
-        if level > 230 {
-            string.push(' ');
-        } else if level >= 200 {
-            string.push('.');
-        } else if level >= 180 {
-            string.push('*');
-        } else if level >= 160 {
-            string.push(':');
-        } else if level >= 130 {
-            string.push('o');
-        } else if level >= 100 {
-            string.push('&');
-        } else if level >= 70 {
-            string.push('8');
-        } else if level >= 50 {
-            string.push('#');
-        } else {
-            string.push('@');
-        }
-
-        place += 1;
-        if place == division - 1 {
-            strings.push(String::with_capacity(division));
-            index += 1;
-        }
+fn char_from_gray(gray: u8) -> char {
+    if gray > 230 {
+        ' '
+    } else if gray >= 200 {
+        '.'
+    } else if gray >= 180 {
+        '*'
+    } else if gray >= 160 {
+        ':'
+    } else if gray >= 130 {
+        'o'
+    } else if gray >= 100 {
+        '&'
+    } else if gray >= 70 {
+        '8'
+    } else if gray >= 50 {
+        '#'
+    } else {
+        '@'
     }
-
-    strings
-}
-
-pub fn to_ascii<P: AsRef<Path>>(
-    image_path: P,
-    dimensions: (u32, u32),
-) -> Result<Vec<char>, AsciiError> {
-    let mut image = ImageReader::open(image_path)?.decode()?;
-    image = image.resize_exact(dimensions.0, dimensions.1, FilterType::Lanczos3);
-
-    let gray_vector = to_gray_vector_from_image(&image)?;
-    let ascii_result = to_chars(gray_vector);
-
-    Ok(ascii_result)
-}
-
-pub fn to_ascii_string<P: AsRef<Path>>(image_path: P, dimensions: (u32, u32)) -> Result<Vec<String>, AsciiError> {
-    let mut image = ImageReader::open(image_path)?.decode()?;
-    image = image.resize_exact(dimensions.0, dimensions.1, FilterType::Lanczos3);
-
-    let gray_vector = to_gray_vector_from_image(&image)?;
-    let ascii_result = to_strings(gray_vector, dimensions.0 as usize);
-
-    Ok(ascii_result)
-}
-
-pub fn to_ascii_from_image(image: &DynamicImage, dimensions: (u32, u32)) -> Result<Vec<String>, AsciiError> {
-    let gray_vector = to_gray_vector_from_image(image)?;
-    let ascii_result = to_strings(gray_vector, dimensions.0 as usize);
-
-    Ok(ascii_result)
 }

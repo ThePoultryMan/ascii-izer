@@ -1,12 +1,13 @@
 use std::path::{Path, PathBuf};
 
-use image::{GenericImageView, ImageReader};
+use image::{imageops::FilterType, ImageReader};
 
-use crate::{to_ascii_from_image, AsciiError};
+use crate::{color::GrayscaleMode, image_into_lines, AsciiError, Line};
 
 #[derive(Default)]
 pub struct ASCIIGenerator {
     image_path: Option<PathBuf>,
+    #[cfg(feature = "color")]
     color: bool,
     dimensions: (u32, u32),
 }
@@ -18,6 +19,7 @@ impl ASCIIGenerator {
         self
     }
 
+    #[cfg(feature = "color")]
     /// Sets whether or not to generate the art with color.
     pub fn set_color(&mut self, color: bool) -> &mut Self {
         self.color = color;
@@ -32,16 +34,14 @@ impl ASCIIGenerator {
     }
 
     /// Generates the art into a [Vec\<String\>](Vec<String>).
-    pub fn build(&self) -> Result<Vec<String>, AsciiError> {
+    pub fn build(&self) -> Result<Vec<Line>, AsciiError> {
         if let Some(image_path) = &self.image_path {
             let image = ImageReader::open(image_path)?.decode()?;
-    
-            let fixed_dimensions = if self.dimensions == (0, 0) {
-                image.dimensions()
-            } else {
-                self.dimensions
-            };
-            Ok(to_ascii_from_image(&image, fixed_dimensions)?)
+
+            if self.dimensions != (0, 0) {
+                let _ = image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
+            }
+            Ok(image_into_lines(&image, GrayscaleMode::Luminosity, #[cfg(feature = "color")] self.color)?)
         } else {
             Err(AsciiError::NoImage)
         }
