@@ -2,7 +2,7 @@ use std::path::Path;
 
 #[cfg(feature = "color")]
 use color::Color;
-use color::{to_grayscale, GrayscaleMode};
+use color::GrayscaleMode;
 use image::{DynamicImage, GenericImageView, ImageReader};
 #[cfg(feature = "crossterm")]
 pub use terminal::put_in_console;

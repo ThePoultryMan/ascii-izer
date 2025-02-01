@@ -9,19 +9,16 @@ use crossterm::{
     cursor::MoveTo,
     style::{self, Print, SetForegroundColor},
     terminal::{size, Clear, ClearType},
-    ExecutableCommand, QueueableCommand,
+    QueueableCommand,
 };
 use image::{imageops::FilterType, ImageReader};
 
 use crate::{
-    color::{Color, GrayscaleMode},
+    color::GrayscaleMode,
     image_into_lines, AsciiError,
 };
 
-pub fn put_in_console<P: AsRef<Path>>(
-    image_path: P,
-    #[cfg(feature = "color")] with_color: bool,
-) -> Result<(), AsciiError> {
+pub fn put_in_console<P: AsRef<Path>>(image_path: P) -> Result<(), AsciiError> {
     let mut stdout = stdout();
 
     let _ = stdout.queue(Clear(ClearType::All));
