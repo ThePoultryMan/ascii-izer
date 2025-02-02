@@ -14,3 +14,7 @@ color = []
 [dependencies]
 crossterm = { version = "0.28.1", optional = true }
 image = "0.25.5"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

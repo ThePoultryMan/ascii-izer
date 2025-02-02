@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 //! > **An image to ASCII art library for rust**
 //! ## Features
 //! * Color \[default\]: Processes the image color alongside the pixels during

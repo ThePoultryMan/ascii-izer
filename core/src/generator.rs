@@ -4,6 +4,10 @@ use image::{imageops::FilterType, ImageReader};
 
 use crate::{color::GrayscaleMode, image_into_lines, AsciiError, Line};
 
+/// A struct used to control the specifics of how an image is converted into
+/// ASCII.
+///
+/// _Note: Color functions are only available with the "color" feature._
 #[derive(Default)]
 pub struct ASCIIGenerator {
     image_path: Option<PathBuf>,
@@ -19,6 +23,7 @@ impl ASCIIGenerator {
         self
     }
 
+    #[cfg_attr(docsrs, doc(cfg(feature = "color")))]
     #[cfg(feature = "color")]
     /// Sets whether or not to generate the art with color.
     pub fn set_color(&mut self, color: bool) -> &mut Self {
@@ -39,9 +44,15 @@ impl ASCIIGenerator {
             let image = ImageReader::open(image_path)?.decode()?;
 
             if self.dimensions != (0, 0) {
-                let _ = image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
+                let _ =
+                    image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
             }
-            Ok(image_into_lines(&image, GrayscaleMode::Luminosity, #[cfg(feature = "color")] self.color)?)
+            Ok(image_into_lines(
+                &image,
+                GrayscaleMode::Luminosity,
+                #[cfg(feature = "color")]
+                self.color,
+            )?)
         } else {
             Err(AsciiError::NoImage)
         }
