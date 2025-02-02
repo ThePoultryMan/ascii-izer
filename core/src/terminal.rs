@@ -15,10 +15,10 @@ use image::{imageops::FilterType, ImageReader};
 
 use crate::{
     color::GrayscaleMode,
-    image_into_lines, AsciiError,
+    image_into_lines, ASCIIError,
 };
 
-pub fn put_in_console<P: AsRef<Path>>(image_path: P) -> Result<(), AsciiError> {
+pub fn put_in_console<P: AsRef<Path>>(image_path: P) -> Result<(), ASCIIError> {
     let mut stdout = stdout();
 
     let _ = stdout.queue(Clear(ClearType::All));
