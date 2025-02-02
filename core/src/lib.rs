@@ -27,7 +27,10 @@ pub use image::DynamicImage;
 use image::{GenericImageView, ImageReader};
 #[cfg(feature = "crossterm")]
 pub use terminal::put_in_console;
-pub use {error::ASCIIError, generator::ASCIIGenerator};
+pub use {
+    error::ASCIIError,
+    generator::{ASCIIGenerator, ResizeMode},
+};
 
 mod color;
 mod error;
