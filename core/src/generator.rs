@@ -16,8 +16,6 @@ pub struct ASCIIGenerator {
 }
 
 /// The type of resizing that the image will undergo.
-///
-///
 #[derive(Default)]
 pub enum ResizeMode {
     /// No resizing will occur.
