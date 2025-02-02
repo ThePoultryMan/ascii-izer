@@ -15,4 +15,4 @@ The functions [to_ascii_lines](https://docs.rs/ascii-izer/latest/ascii_izer/fn.t
 
 ### Advanced
 
-The [ASCIIGenerator] struct can be used to have more control over the exact parameters used.
+The [ASCIIGenerator](https://docs.rs/ascii-izer/latest/ascii_izer/struct.ASCIIGenerator.html) struct can be used to have more control over the exact parameters used.
