@@ -36,10 +36,10 @@ impl ASCIIGenerator {
     /// Throws an [ASCIIError](crate::error::ASCIIError) if the image at the
     /// provided path cannot be found or read.
     pub fn generate<P: AsRef<Path>>(&self, image_path: P) -> Result<Vec<Line>, ASCIIError> {
-        let image = ImageReader::open(image_path)?.decode()?;
+        let mut image = ImageReader::open(image_path)?.decode()?;
 
         if self.dimensions != (0, 0) {
-            let _ = image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
+            image = image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
         }
         image_into_lines(
             &image,
