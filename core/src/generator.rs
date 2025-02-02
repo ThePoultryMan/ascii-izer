@@ -41,11 +41,11 @@ impl ASCIIGenerator {
         if self.dimensions != (0, 0) {
             let _ = image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
         }
-        Ok(image_into_lines(
+        image_into_lines(
             &image,
             GrayscaleMode::Luminosity,
             #[cfg(feature = "color")]
             self.color,
-        )?)
+        )
     }
 }

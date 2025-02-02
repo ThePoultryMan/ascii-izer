@@ -3,9 +3,9 @@
 //! > **An image to ASCII art library for rust**
 //! ## Features
 //! * Color \[default\]: Processes the image color alongside the pixels during
-//! ASCII generation.
+//!   ASCII generation.
 //! * Crossterm: Provides a simple method to put the ASCII into the console via
-//! crossterm. This does not output color
+//!   crossterm. This does not output color
 //! 
 //! ## Usage
 //! ### Simple
