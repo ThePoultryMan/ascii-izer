@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use image::{imageops::FilterType, ImageReader};
 
@@ -10,19 +10,12 @@ use crate::{color::GrayscaleMode, image_into_lines, ASCIIError, Line};
 /// _Note: Color functions are only available with the "color" feature._
 #[derive(Default)]
 pub struct ASCIIGenerator {
-    image_path: Option<PathBuf>,
     #[cfg(feature = "color")]
     color: bool,
     dimensions: (u32, u32),
 }
 
 impl ASCIIGenerator {
-    /// Sets the image that is used to generate art.
-    pub fn set_image<P: AsRef<Path>>(&mut self, image: P) -> &mut Self {
-        self.image_path = Some(image.as_ref().to_path_buf());
-        self
-    }
-
     #[cfg_attr(docsrs, doc(cfg(feature = "color")))]
     #[cfg(feature = "color")]
     /// Sets whether or not to generate the art with color.
@@ -38,23 +31,21 @@ impl ASCIIGenerator {
         self
     }
 
-    /// Generates the art into a [Vec\<String\>](Vec<String>).
-    pub fn build(&self) -> Result<Vec<Line>, AsciiError> {
-        if let Some(image_path) = &self.image_path {
-            let image = ImageReader::open(image_path)?.decode()?;
+    /// Using the current settings, generates image into ASCII.
+    ///
+    /// Throws an [ASCIIError](crate::error::ASCIIError) if the image at the
+    /// provided path cannot be found or read.
+    pub fn generate<P: AsRef<Path>>(&self, image_path: P) -> Result<Vec<Line>, ASCIIError> {
+        let image = ImageReader::open(image_path)?.decode()?;
 
-            if self.dimensions != (0, 0) {
-                let _ =
-                    image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
-            }
-            Ok(image_into_lines(
-                &image,
-                GrayscaleMode::Luminosity,
-                #[cfg(feature = "color")]
-                self.color,
-            )?)
-        } else {
-            Err(AsciiError::NoImage)
+        if self.dimensions != (0, 0) {
+            let _ = image.resize_exact(self.dimensions.0, self.dimensions.1, FilterType::Lanczos3);
         }
+        Ok(image_into_lines(
+            &image,
+            GrayscaleMode::Luminosity,
+            #[cfg(feature = "color")]
+            self.color,
+        )?)
     }
 }
