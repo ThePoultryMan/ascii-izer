@@ -26,7 +26,7 @@ use color::GrayscaleMode;
 use image::{DynamicImage, GenericImageView, ImageReader};
 #[cfg(feature = "crossterm")]
 pub use terminal::put_in_console;
-pub use {error::AsciiError, generator::ASCIIGenerator};
+pub use {error::ASCIIError, generator::ASCIIGenerator};
 
 mod color;
 mod error;
@@ -71,7 +71,7 @@ pub fn to_ascii_lines<P: AsRef<Path>>(
     path: P,
     grayscale_mode: GrayscaleMode,
     #[cfg(feature = "color")] with_color: bool,
-) -> Result<Vec<Line>, AsciiError> {
+) -> Result<Vec<Line>, ASCIIError> {
     let image = ImageReader::open(path)?.decode()?;
     image_into_lines(
         &image,
@@ -85,7 +85,7 @@ pub fn image_into_lines(
     image: &DynamicImage,
     grayscale_mode: GrayscaleMode,
     #[cfg(feature = "color")] with_color: bool,
-) -> Result<Vec<Line>, AsciiError> {
+) -> Result<Vec<Line>, ASCIIError> {
     let mut lines: Vec<Line> =
         vec![Line::new(image.dimensions().0 as usize); image.dimensions().1 as usize];
     for (_, y, color) in image.pixels() {

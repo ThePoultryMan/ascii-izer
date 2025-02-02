@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use image::{imageops::FilterType, ImageReader};
 
-use crate::{color::GrayscaleMode, image_into_lines, AsciiError, Line};
+use crate::{color::GrayscaleMode, image_into_lines, ASCIIError, Line};
 
 /// A struct used to control the specifics of how an image is converted into
 /// ASCII.
